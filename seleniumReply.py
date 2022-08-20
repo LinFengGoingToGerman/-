@@ -9,18 +9,24 @@ FOLDER_PATH = r'C:\Users\gao_xiaolin\Desktop\reply\log' + '\\'
 FILE_NAME = 'seleniumReply.log'
 
 class chromeDriver:
+
     def __init__(self):
         #  加载profile，可以免登陆
         options = webdriver.ChromeOptions()
         userDir = r'C:\Users\gao_xiaolin\AppData\Local\Google\Chrome\User Data2'
         options.add_argument('--user-data-dir=' + userDir)
+        options.add_experimental_option('excludeSwitches', ['enable-logging'])
+        options.add_argument('--disable-extensions')       # すべての拡張機能を無効にする。ユーザースクリプトも無効にする
+        options.add_argument('--proxy-server="direct://"') # Proxy経由ではなく直接接続する
+        options.add_argument('--proxy-bypass-list=*')      # すべてのホスト名
+        options.add_argument('--blink-settings=imagesEnabled=false')  # 画像を非表示にする
         #options.add_argument('--headless') #  会被百度发现，悲伤
 
         chrome_service = service.Service(executable_path = ChromeDriverManager().install())
         driver = webdriver.Chrome(service = chrome_service, options = options)
         self.driver = driver
         self.driver.maximize_window()
-        self.driver.implicitly_wait(20) # 只需调用一次
+        self.driver.implicitly_wait(5) # 只需调用一次
         self.hasError = False
 
         '''
