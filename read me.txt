@@ -1,0 +1,2 @@
+seleniumReply.py 笔者用visual studio code编写的
+play.cmd 命令文件，可以输出日志（用visual studio code本身输出不了日志，因为输出日志的命令在.cmd文件里）
