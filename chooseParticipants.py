@@ -1,6 +1,7 @@
 import random,datetime,sys,io
 import pandas as pd
 from enum import Enum
+from dateutil.relativedelta import relativedelta
 
 
 class PlayType(Enum):
@@ -60,7 +61,8 @@ class Heroines:
     def chooseHeroine(self, applicants):
         # 从候选人中删除最近一月已担任过主角的
         for index, i in enumerate(applicants):
-            if i.name in self.heroines and (self.heroines[i.name].date + datetime.timedelta(days=27)) > self.today:
+            date = self.heroines[i.name].date # 最近一次担任主角的日期
+            if i.name in self.heroines and (datetime.date(date.year,date.month,1) + relativedelta(months = 1)) > self.today:
                 del applicants[index]
         
         # 如上述操作后仍有候选人，从中随机抽取一位作为本周主角
@@ -142,7 +144,8 @@ if any(am.playType == PlayType.古原男皮 for am in resultList) and any(mm.pla
 # 输出主角
 printedList = heroines.printHeroines(resultList, chooseFemale, chooseMale)
 # 更新存放主角的文件
-heroines.outputHeroines(printedList)
+if printedList:
+    heroines.outputHeroines(printedList)
 
 
 
