@@ -1,8 +1,16 @@
 import random,datetime,sys,io
 import pandas as pd
+from enum import Enum
 
-namePlayTypeDic = {'古原女皮':0, '古原男皮':1, '现原女皮':2, '现原男皮':3}
-playTypeNameDic = {0:'古原女皮', 1:'古原男皮', 2:'现原女皮', 3:'现原男皮'}
+
+class PlayType(Enum):
+    古原女皮 = 0
+    古原男皮 = 1
+    现原女皮 = 2
+    现原男皮 = 3
+
+namePlayTypeDic = {'古原女皮':PlayType.古原女皮, '古原男皮':PlayType.古原男皮, '现原女皮':PlayType.现原女皮, '现原男皮':PlayType.现原男皮}
+playTypeNameDic = {PlayType.古原女皮:'古原女皮', PlayType.古原男皮:'古原男皮', PlayType.现原女皮:'现原女皮', PlayType.现原男皮:'现原男皮'}
 
 PARTICIPANTS_FILEPATH = r"C:\Users\gao_xiaolin\Desktop\reply\GitRepositoryNew\Participants.tsv"
 HEROINES_FILEPATH = r"C:\Users\gao_xiaolin\Desktop\reply\GitRepositoryNew\Heroines.tsv"
@@ -58,19 +66,9 @@ class Heroines:
         # 如上述操作后仍有候选人，从中随机抽取一位作为本周主角
         if applicants:
             applicant = random.choice(applicants)
-            return applicant
-    
-    # 更新存放主角人选的TSV文件
-    def outputHeroines(self,resultList):
-        outputList = []
-        for j in self.heroines.values():
-            outputList.append([j.name, j.date, j.count]) 
-        for i in resultList:
-            outputList.append([i.name, self.today, 1])
+            return applicant    
 
-        df = pd.DataFrame(outputList)
-        outputTsvWithPandas(df,HEROINES_FILEPATH)  
-
+    # 输出主角
     def printHeroines(self, resultList, chooseFemale, chooseMale):
         if not chooseFemale and not chooseMale:
             print('因报名人数过少，本期轮空。')
@@ -80,32 +78,48 @@ class Heroines:
         if chooseFemale and chooseMale:
             pass
         elif chooseFemale:
-            resultList = [value for value in resultList if value.playType in (0,2)]
+            resultList = [value for value in resultList if value.playType in (PlayType.古原女皮, PlayType.现原女皮)]
             print('因报名人数过少，本期男皮轮空。')
         elif chooseMale:
-            resultList = [value for value in resultList if value.playType in (1,3)]
+            resultList = [value for value in resultList if value.playType in (PlayType.古原男皮,PlayType.现原男皮)]
             print('因报名人数过少，本期女皮轮空。')
 
         for l in resultList:
             print(playTypeNameDic[l.playType] + ':' + l.name)
+        
+        return resultList
 
-        # 更新存放主角的文件
-        Heroines.outputHeroines(self, resultList)
+    # 更新存放主角人选的TSV文件
+    def outputHeroines(self,resultList):
+        for i in resultList:
+            # 重复参加：更新末次日期，参加次数+1
+            if i.name in self.heroines:
+                self.heroines[i.name].date = self.today
+                self.heroines[i.name].count += 1
+            else:
+                self.heroines[i.name] = Heroines.Heroine(i.name, self.today)
+
+        outputList = []
+        for j in self.heroines.values():
+            outputList.append([j.name, j.date, j.count]) 
+
+        df = pd.DataFrame(outputList)
+        outputTsvWithPandas(df,HEROINES_FILEPATH) 
 
     class Heroine:
-        def __init__(self, name, date, count):
+        def __init__(self, name, date, count=1):
             self.name = name
             self.date = date
             self.count = count  
 
 # 读取存放参加者资料的TSV文件
 df = readTsvWithPandas(PARTICIPANTS_FILEPATH)
-# 分古原女皮，古原男皮，现原女皮，现原男皮四项，分别抽取主角
 
+# 分古原女皮，古原男皮，现原女皮，现原男皮四项，分别抽取主角。
 heroines = Heroines()
 resultList = []    
 
-judgeDic = {0:False, 1:False, 2:False, 3:False}
+judgeDic = {PlayType.古原女皮:False, PlayType.古原男皮:False, PlayType.现原女皮:False, PlayType.现原男皮:False}
 chooseFemale = chooseMale = False
 for row in df.itertuples(name=None):
     aps = Applicants() 
@@ -119,13 +133,16 @@ for row in df.itertuples(name=None):
     if result:
         resultList.append(result)
 
-if any(af.playType == 0 for af in resultList) and any(mf.playType == 2 for mf in resultList):
+# 当缺失任意类型女皮时，取消女皮配对。男皮同理。
+if any(af.playType == PlayType.古原女皮 for af in resultList) and any(mf.playType == PlayType.现原女皮 for mf in resultList):
     chooseFemale = True
-if any(am.playType == 1 for am in resultList) and any(mm.playType == 3 for mm in resultList):
+if any(am.playType == PlayType.古原男皮 for am in resultList) and any(mm.playType == PlayType.现原男皮 for mm in resultList):
     chooseMale = True
 
 # 输出主角
-heroines.printHeroines(resultList, chooseFemale, chooseMale)
+printedList = heroines.printHeroines(resultList, chooseFemale, chooseMale)
+# 更新存放主角的文件
+heroines.outputHeroines(printedList)
 
 
 
