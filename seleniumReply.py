@@ -102,7 +102,7 @@ if sys.stdout.encoding != 'UTF-8':
     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
 
 # 前三个是我的，后两个是阿睿的
-pageDic = {'https://tieba.baidu.com/p/7836447213': '语c吧·第一性','https://tieba.baidu.com/p/7836243922':'宫斗吧·第一性', 'https://tieba.baidu.com/p/7977019554':'演绎吧·第一性','https://tieba.baidu.com/p/7762268308':'原创语c吧·第一性', 'https://tieba.baidu.com/p/7906257480':'语c吧·女孩乌托邦', 'https://tieba.baidu.com/p/7910096424': '演绎吧·女孩乌托邦'}
+pageDic = {'https://tieba.baidu.com/p/7989051581': '语c吧·第一性','https://tieba.baidu.com/p/7989062041':'宫斗吧·第一性', 'https://tieba.baidu.com/p/7989060628':'演绎吧·第一性','https://tieba.baidu.com/p/7989067298':'原创语c吧·第一性', 'https://tieba.baidu.com/p/7906257480':'语c吧·女孩乌托邦', 'https://tieba.baidu.com/p/7910096424': '演绎吧·女孩乌托邦'}
 
 driver1 = chromeDriver()
 for page in pageDic:
